@@ -198,6 +198,8 @@ class VPNUtils {
         let configData = config
         self.providerManager?.loadFromPreferences { error in
             if error == nil {
+                print("VPN SWIFT ==>>> Started Configuring VPN")
+            
                 let tunnelProtocol = NETunnelProviderProtocol()
                 tunnelProtocol.serverAddress = ""
                 tunnelProtocol.providerBundleIdentifier = self.providerBundleIdentifier
@@ -214,11 +216,15 @@ class VPNUtils {
                 self.providerManager.isEnabled = true
                 self.providerManager.saveToPreferences(completionHandler: { (error) in
                     if error == nil  {
+                print("VPN SWIFT ==>>> Saved to Preferences")
                         self.providerManager.loadFromPreferences(completionHandler: { (error) in
                             if error != nil {
                                 completion(error);
+                                 print("VPN SWIFT ==>>> Error Loading from Preferences")
                                 return;
                             }
+                                 print("VPN SWIFT ==>>> Loaded from Preferences")
+                            
                             do {
                                 if self.vpnStageObserver != nil {
                                     NotificationCenter.default.removeObserver(self.vpnStageObserver!,
@@ -228,6 +234,7 @@ class VPNUtils {
                                 self.vpnStageObserver = NotificationCenter.default.addObserver(forName: NSNotification.Name.NEVPNStatusDidChange,
                                                                                                object: nil ,
                                                                                                queue: nil) { [weak self] notification in
+                                    print("VPN SWIFT ==>>> TRYING TO CONNECT")
                                     let nevpnconn = notification.object as! NEVPNConnection
                                     let status = nevpnconn.status
                                     self?.onVpnStatusChanged(notification: status)
@@ -238,12 +245,15 @@ class VPNUtils {
                                         "username": username! as NSString,
                                         "password": password! as NSString
                                     ]
+                                    print("VPN SWIFT ==>>> Starting VPN Tunnel")
                                     try self.providerManager.connection.startVPNTunnel(options: options)
                                 }else{
+                                    print("VPN SWIFT ==>>> Starting VPN Tunnel Without Credential")
                                     try self.providerManager.connection.startVPNTunnel()
                                 }
                                 completion(nil);
                             } catch let error {
+                                print("VPN SWIFT ==>>> Error was thrown while starting VPN Tunnel")
                                 self.stopVPN()
                                 print("Error info: \(error)")
                                 completion(error);
